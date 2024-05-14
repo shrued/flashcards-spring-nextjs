@@ -3,6 +3,7 @@ import React from "react";
 
 export interface FlashcardProps {
   id: string;
+  deckId: string;
   front: string;
   back: string;
 }

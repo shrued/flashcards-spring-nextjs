@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import FlashcardList from "./FlashcardList";
 import { FlashcardProps } from "./Flashcard";
+import DeckList from "./DeckList";
+import { DeckProps } from "./Deck";
 
 const Page: React.FC = () => {
   const [flashcards, setFlashcards] = useState<FlashcardProps[]>([]);
@@ -12,13 +14,11 @@ const Page: React.FC = () => {
     const fetchFlashcards = async () => {
       try {
         const response = await fetch("http://localhost:8080/api/flashcards");
-        console.log(response);
 
         if (!response.ok) {
           throw new Error("Network response was not ok.");
         }
         const data = await response.json();
-        console.log(data);
 
         setFlashcards(data);
       } catch (error) {
@@ -32,12 +32,28 @@ const Page: React.FC = () => {
     fetchFlashcards();
   }, []);
 
+  const decks: DeckProps[] = [];
+
+  flashcards.forEach((flashcard) => {
+    const existingDeck = decks.find((deck) => deck.id === flashcard.deckId);
+
+    if (existingDeck) {
+      existingDeck.flashcards.push(flashcard);
+    } else {
+      decks.push({
+        id: flashcard.deckId,
+        title: `Deck ${flashcard.deckId}`,
+        flashcards: [flashcard],
+      });
+    }
+  });
+
   if (isLoading) return <p>Loading flashcards...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <FlashcardList flashcards={flashcards} />
+      <DeckList decks={Object.values(decks)} />
     </main>
   );
 };
